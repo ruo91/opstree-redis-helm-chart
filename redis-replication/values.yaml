@@ -41,6 +41,10 @@ externalConfig:
     tcp-backlog 65535
     timeout 0
     tcp-keepalive 300
+
+    # Announce IP
+    #replica-announce-ip redis.example.com
+    #replica-announce-port 30012
     
     # Memory Usage
     maxmemory 32gb

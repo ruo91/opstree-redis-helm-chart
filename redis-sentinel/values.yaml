@@ -38,8 +38,8 @@ redisSentinelConfig:
     secretName: "redis-secret"
     secretKey: "password"
   masterGroupName: "redis"
-  resolveHostnames: "redis.example.com"
-  announceHostnames: "reids.example.com"
+  resolveHostnames: "yes"
+  announceHostnames: "yes"
   redisPort: "6379"
   quorum: "2"
   parallelSyncs: "1"
@@ -55,6 +55,10 @@ externalConfig:
     tcp-backlog 65535
     timeout 0
     tcp-keepalive 300
+
+    # Announce IP
+    #sentinel announce-ip redis.example.com
+    #sentinel announce-port 30011
     
     # Memory Usage
     maxmemory 32gb
