@@ -80,6 +80,13 @@ $ helm install redis redis/redis-operator --namespace openshift-operators
 $ helm install redis redis/redis --namespace redis
 ```
 
+## 9. How to deploy and use locally
+```shell
+$ git clone https://github.com/ruo91/operator-redis-helm-chart.git
+$ cd operator-redis-helm-chart
+$ helm install redis redis --namespace redis
+```
+
 ## :pushpin: Notes
 Replace http://repos.example.com/helm-repo with your actual repository URL.  
 Ensure your HTTP server allows directory listing if you want Helm to fetch the index.  
