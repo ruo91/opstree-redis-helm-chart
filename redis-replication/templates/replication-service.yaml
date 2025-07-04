@@ -22,8 +22,9 @@ spec:
     redis_setup_type: replication
     role: replication
   ports:
-    - protocol: TCP
-      port: {{ .Values.externalService.port }}
+    - name: client
+      protocol: TCP
+      port: 6379
       targetPort: 6379
-      name: client
+      nodePort: {{ .Values.externalService.port }}
 {{- end }}

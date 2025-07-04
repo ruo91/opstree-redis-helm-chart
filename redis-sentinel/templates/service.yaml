@@ -22,8 +22,9 @@ spec:
     redis_setup_type: sentinel
     role: sentinel
   ports:
-    - protocol: TCP
-      port: {{ .Values.externalService.port }}
+    - name: client
+      protocol: TCP
+      port: 26379
       targetPort: 26379
-      name: client
+      nodePort: {{ .Values.externalService.port }}
 {{- end }}
