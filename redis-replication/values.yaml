@@ -217,3 +217,8 @@ acl:
 env: []
   # - name: VAR_NAME
   #   value: "value1"
+
+pdb:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: null
