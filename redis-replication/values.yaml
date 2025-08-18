@@ -218,7 +218,16 @@ env: []
   # - name: VAR_NAME
   #   value: "value1"
 
-pdb:
-  enabled: false
-  minAvailable: 1
-  maxUnavailable: null
+livenessProbe:
+  failureThreshold: 10
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  successThreshold: 1
+  timeoutSeconds: 30
+
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  successThreshold: 3
+  timeoutSeconds: 30

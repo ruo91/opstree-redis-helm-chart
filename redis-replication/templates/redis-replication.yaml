@@ -95,9 +95,11 @@ spec:
   {{- if .Values.env }}
   env: {{ toYaml .Values.env | nindent 4 }}
   {{- end }}
-  {{- if .Values.pdb.enabled }}
-  pdb:
-    enabled: {{ .Values.pdb.enabled }}
-    minAvailable: {{ .Values.pdb.minAvailable }}
-    maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- with .Values.livenessProbe }}
+  livenessProbe:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.readinessProbe }}
+  readinessProbe:
+    {{- toYaml . | nindent 4 }}
   {{- end }}
