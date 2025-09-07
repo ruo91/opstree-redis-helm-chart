@@ -26,5 +26,7 @@ spec:
       protocol: TCP
       port: 26379
       targetPort: 26379
-      nodePort: {{ .Values.externalService.port }}
+      {{- if and (eq .Values.externalService.serviceType "NodePort") (hasKey .Values.externalService "nodePort") }}
+      nodePort: {{ .Values.externalService.nodePort }}
+      {{- end }}
 {{- end }}

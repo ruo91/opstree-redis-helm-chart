@@ -113,7 +113,8 @@ externalService:
   # annotations:
   #   foo: bar
   serviceType: NodePort
-  port: 30010
+  port: 6379
+  nodePort: 30011
 
 serviceMonitor:
   enabled: false
