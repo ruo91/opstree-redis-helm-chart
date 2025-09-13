@@ -4,7 +4,7 @@ redisOperator:
   #imageName: ghcr.io/ot-container-kit/redis-operator/redis-operator
   imageName: docker.io/ruo91/opstree-redis-operator
   # Overrides the image tag whose default is the chart appVersion.
-  imageTag: "v0.21.0"
+  imageTag: "v0.22.0"
   imagePullPolicy: Always
   imagePullSecrets: []
 
