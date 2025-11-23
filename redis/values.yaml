@@ -2,7 +2,7 @@
 redisStandalone:
   name: "redis"
   image: docker.io/ruo91/opstree-redis-fedora
-  tag: v8.0.2
+  tag: v8.2.3
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
     # - name:  Secret with Registry credentials
