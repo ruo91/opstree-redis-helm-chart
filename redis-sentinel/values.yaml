@@ -159,20 +159,24 @@ initContainer:
   command: []
   args: []
 
-sidecars:
-  name: "redis-tools"
-  image: "docker.io/ruo91/opstree-redis-tools-fedora:v8.0.2"
-  imagePullPolicy: "IfNotPresent"
-  #resources:
-  #  limits:
-  #    cpu: "100m"
-  #    memory: "128Mi"
-  #  requests:
-  #    cpu: "50m"
-  #    memory: "64Mi"
-  env: []
-    # - name: MY_ENV_VAR
-    #   value: "my-env-var-value"
+sidecars: []
+  # - name: "redis-tools"
+  #   image: "docker.io/ruo91/opstree-redis-tools-fedora:v8.0.2"
+  #   imagePullPolicy: "IfNotPresent"
+  #   resources:
+  #     limits:
+  #       cpu: "100m"
+  #       memory: "128Mi"
+  #     requests:
+  #       cpu: "50m"
+  #       memory: "64Mi"
+  #   env: []
+  #   # - name: MY_ENV_VAR
+  #   #   value: "my-env-var-value"
+  #   command: []
+  #   # - "/bin/sh"
+  #   # - "-c"
+  #   # - "sleep 3600"
 
 priorityClassName: ""
 

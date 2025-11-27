@@ -94,6 +94,7 @@ helm delete <my-release> --namespace <namespace>
 | serviceMonitor.interval | string | `"30s"` |  |
 | serviceMonitor.namespace | string | `""` | Namespace where servicemonitor resource will be created, if empty it will be created in the same namespace as the redis |
 | serviceMonitor.scrapeTimeout | string | `"10s"` |  |
+| sidecars | list | `[]` |  |
 | sidecars.env | list | `[]` |  |
 | sidecars.image | string | `""` |  |
 | sidecars.imagePullPolicy | string | `"IfNotPresent"` |  |
