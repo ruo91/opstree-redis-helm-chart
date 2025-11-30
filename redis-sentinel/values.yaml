@@ -49,64 +49,141 @@ redisSentinelConfig:
 externalConfig:
   enabled: true
   data: |
-    # Connection Management
-    #protected-mode no
-    maxclients 500000
-    tcp-backlog 65535
-    timeout 0
-    tcp-keepalive 300
-
-    # Announce IP
-    #sentinel announce-ip redis.example.com
-    #sentinel announce-port 30011
+    #### Connectio Management ####
+    # Disable protected mode. DANGEROUS on a public interface.
+    # Only use this when Redis is bound to private networks and/or ACL+AUTH is enforced.
+    protected-mode no
     
-    # Memory Usage
-    maxmemory 32gb
+    # Maximum number of client connections. Requires matching OS fd/ulimit tuning.
+    # Very high values also require sufficient memory for client state.
+    maxclients 50000
+    
+    # Listen backlog for pending TCP connection (subject to /proc/sys/net/core/somaxconn).
+    tcp-backlog 65535
+    
+    # Client idle timeout in seconds; 0 = never idsconnect idle clients.
+    timeout 0
+    
+    # TCP keepalive interval in seconds. Helps detect dead peers/NAT drops.
+    tcp-keepalive 300
+    
+    #### Announce IP/Port (for replicas behind NAT) ####
+    # use these when the master must connect back to a  replica that is not directly reachable.
+    #sentinel announce-ip 192.168.0.100
+    #sentinel announce-port 30012
+    
+    #### Memory Usage & Eviction ####
+    # Hard cap for Redis memory. Includes data + overhead + client buffers.
+    maxmemory 1gb
+    
+    # Evict any key (volatile or not) using LRU when memory is full.
     maxmemory-policy allkeys-lru
+    
+    # Number of samples checked by LRU/LFU/TTL algorithms (higher = better accuracy, more CPU).
     maxmemory-samples 10
     
-    # Performance / Timing
-    hz 500
-    #dynamic-hz yes
+    #### Performance / Timing ####
+    # Server cron frequency (1..500). Higher reduces latency of periodic tasks but increases CPU.
+    hz 100
     
-    # Latency tuning
+    # Dynamically scale internal frequency based on load (uses 'hz' as the upper bound).
+    # Redis 8 defaults to 'yes'. Uncommect to be explicit.
+    dynamic-hz yes
+    
+    #### Latency tuning & Slow Log ####
+    # Record operations taking >= 5 ms for analysis with LATENCY commands.
     latency-monitor-threshold 5
+    
+    # Log commands slower than 15 ms to the slowlog.
     slowlog-log-slower-than 15000
+    # ...keeping up to 1024 entries (oldest evicted).
     slowlog-max-len 1024
     
-    # Append only file rewrite settings
+    #### Append Only File (AOF) / RDB durability ####
+    # Fsync AOF once per second (balance durability and throughput; up to ~1s data loss on crash).
+    appendfsync everysec
+    
+    # Start AOF with an RDB preamble for faster restarts.
+    aof-use-rdb-preamble yes
+    
+    # On startup, accept truncated AOF by discarding the corrupted tail.
+    aof-load-truncated yes
+    
+    # Incremental fsync during AOF rewrite to smooth I/O.
+    aof-rewrite-incremental-fsync yes
+    
+    # Incremental fsync during RDB saves to reduce latency spikes.
+    rdb-save-incremental-fsync yes
+    
+    # Trigger automatic AOF rewrite when file size doubled since last rewrite...
     auto-aof-rewrite-percentage 100
+    # ...and only if the file is at least 128 MB.
     auto-aof-rewrite-min-size 128mb
     
-    # Advanced fd tuning
-    client-output-buffer-limit normal 0 0 0
-    client-output-buffer-limit slave 128mb 64mb 60
+    #### Client Output Buffer limits ####
+    # Format: <class> <hard> <soft> <soft-seconds>
+    # > hard -> immediate disconnect
+    # > soft for soft-seconds -> disconnect
+    
+    # Replicas: generous to avoid link breaks during bursts (uses RAM).
+    client-output-buffer-limit replica 1024mb 512mb 120
+    
+    # Deprecated alias for backward compatibility (same as 'replica').
+    client-output-buffer-limit slave 1024mb 512mb 120
+    
+    # Normal clients: balanced limits for spikes vs memory usage.
+    client-output-buffer-limit normal 256mb 128mb 120
+    
+    # Pub/Sub clients: tighter limits to prevent fan-out blowups.
     client-output-buffer-limit pubsub 256mb 64mb 60
     
-    # Optimizing memory
+    #### Replication robustness ####
+    # Ring buffer for partial resync (PSYNC). Larger values tolerate longer outages.
+    repl-backlog-size 1gb
+    
+    # Keep backlog this many seconds after the last replica disconnects.
+    repl-backlog-ttl 3600
+    
+    # I/O timeout for master/replica links (seconds) before marking broken.
+    repl-timeout 120
+    
+    # Master pings replicas every N seconds (keepalive + lag measurement).
+    repl-ping-replica-period 10
+    
+    # Send snapshot directly over the socket (no on-disk temp file) for full syncs.
+    repl-diskless-sync yes
+    
+    # When diskless, wait N seconds to gather more replicas before starting bulk transfer.
+    repl-diskless-sync-delay 5
+    
+    #### Memory optimization for small Hashes ####
+    # NOTE (Redis >= 7): "hash-max-ziplist-*" are legacy aliases for listpack thresholds.
+    # Prefer "hash-max-listpack-*" in new configs; these aliases still work in Redis 8.
+    # Use compact encoding for hashes with <= 1024 fields...
     hash-max-ziplist-entries 1024
+    
+    # and when each field+value is <= 256 bytes. Larger hashes are promoted to hashtable.
     hash-max-ziplist-value 256
     
-    # When enabled, Redis evicts keys in a lazy (asynchronous) manner using background threads.
-    # This reduces latency spikes during eviction by avoiding time-consuming deletions on the main thread.
+    #### Asynchronous freeing & defragmentation ####
+    # Evict keys lazily in background threads (reduces main-thread pauses during eviction).
     lazyfree-lazy-eviction yes
     
-    # Enables lazy (asynchronous) deletion of expired keys.
-    # Instead of removing keys synchronously when they expire, Redis defers the actual memory release to background threads.
+    # Free expired keys asynchronously instead of during the expiry path.
     lazyfree-lazy-expire yes
     
-    # When enabled, Redis performs DEL operations in a non-blocking way using background threads,
-    # particularly for complex data types like lists, hashes, or sorted sets with many elements.
+    # Perform DEL for complex objects in background threads (non-blocking deletes).
     lazyfree-lazy-server-del yes
     
-    # Implementing Memory Defragmentation
-    # Enables active memory defragmentation to reduce fragmentation in long-running Redis instances.
-    # Helps reclaim fragmented memory and maintain performance stability over time.
+    # Actively defragment memory to combat long-running fragmentation and stabilize RSS.
     activedefrag yes
     
-    # Multi-Threads
-    io-threads-do-reads yes
-    io-threads 4
+    #### I/O Multi-Threading ####
+    # Offload read handling to I/O threads (writes remain serialized on the main thread).
+    io-threads-do-reads no
+    
+    # Number of I/O threads. Use a value close to available CPU cores; too high can hurt performance.
+    #io-threads 1
 
 externalService:
   enabled: true
