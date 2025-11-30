@@ -107,6 +107,11 @@ spec:
   env: {{ toYaml .Values.env | nindent 4 }}
   {{- end }}
   {{- with .Values.livenessProbe }}
+  pdb:
+    enabled: {{ .Values.pdb.enabled }}
+    minAvailable: {{ .Values.pdb.minAvailable }}
+    maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- end }}
   livenessProbe:
     {{- toYaml . | nindent 4 }}
   {{- end }}
