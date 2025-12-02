@@ -264,10 +264,47 @@ storageSpec:
   #   selector: {}
 
 podSecurityContext:
-  runAsUser: 1000
-  fsGroup: 1000
+  #runAsUser: 1000
+  #fsGroup: 1000
+  runAsUser: 0
+  fsGroup: 0
+  sysctls:
+  - name: net.ipv4.tcp_congestion_control
+    value: "bbr"
+  - name: net.core.somaxconn
+    value: "1048576"
+  - name: net.ipv4.tcp_max_syn_backlog
+    value: "65536"
+  - name: net.ipv4.ip_nonlocal_bind
+    value: "1"
+  - name: net.ipv4.tcp_tw_reuse
+    value: "1"
+  - name: net.ipv4.tcp_fin_timeout
+    value: "15"
+  - name: net.ipv4.tcp_keepalive_time
+    value: "600"
+  - name: net.ipv4.tcp_keepalive_probes
+    value: "3"
+  - name: net.ipv4.tcp_keepalive_intvl
+    value: "15"
+  - name: net.ipv4.tcp_syncookies
+    value: "1"
+  - name: net.ipv4.tcp_syn_retries
+    value: "3"
+  - name: net.ipv4.tcp_slow_start_after_idle
+    value: "0"
+  - name: net.ipv4.tcp_fastopen
+    value: "3"
+  - name: net.ipv4.tcp_sack
+    value: "1"
+  - name: net.ipv4.tcp_mtu_probing
+    value: "1"
+  - name: net.ipv4.tcp_timestamps
+    value: "1"
 
-securityContext: {}
+#securityContext: {}
+securityContext:
+  privileged: true
 
 #affinity: {}
 affinity:
