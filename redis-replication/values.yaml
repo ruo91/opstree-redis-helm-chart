@@ -32,6 +32,22 @@ redisReplication:
   #    Default is 0 (disabled).
   maxMemoryPercentOfLimit: 0
 
+  #livenessProbe: {}
+  livenessProbe:
+    timeoutSeconds: 5
+    periodSeconds: 15
+    successThreshold: 1
+    failureThreshold: 5
+    initialDelaySeconds: 15
+
+  #readinessProbe: {}
+  readinessProbe:
+    timeoutSeconds: 5
+    periodSeconds: 15
+    successThreshold: 1
+    failureThreshold: 5
+    initialDelaySeconds: 15
+
 # Overwite name for resources
 # name: ""
 
@@ -349,17 +365,3 @@ pdb:
   enabled: false
   minAvailable: 1
   maxUnavailable: null
-
-livenessProbe:
-  failureThreshold: 10
-  initialDelaySeconds: 60
-  periodSeconds: 30
-  successThreshold: 1
-  timeoutSeconds: 30
-
-readinessProbe:
-  failureThreshold: 3
-  initialDelaySeconds: 60
-  periodSeconds: 30
-  successThreshold: 3
-  timeoutSeconds: 30

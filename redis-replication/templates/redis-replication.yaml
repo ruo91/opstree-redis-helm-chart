@@ -30,6 +30,12 @@ spec:
     {{- if .Values.redisReplication.minReadySeconds }}
     minReadySeconds: {{ .Values.redisReplication.minReadySeconds}}
     {{- end }}
+  {{- if .Values.redisReplication.livenessProbe }}
+  livenessProbe: {{ toYaml .Values.redisReplication.livenessProbe | nindent 4 }}
+  {{- end }}
+  {{- if .Values.redisReplication.readinessProbe }}
+  readinessProbe: {{ toYaml .Values.redisReplication.readinessProbe | nindent 4 }}
+  {{- end }}
 
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
@@ -45,7 +51,6 @@ spec:
     securityContext: {{ toYaml .Values.redisExporter.securityContext | nindent 6 }}
     {{- end }}
   
-  {{- if .Values.externalConfig.enabled }}
   redisConfig:
   {{- if .Values.externalConfig.enabled }}
     additionalRedisConfig: "{{ .Values.redisReplication.name | default .Release.Name }}-ext-config"
@@ -106,16 +111,10 @@ spec:
   {{- if .Values.env }}
   env: {{ toYaml .Values.env | nindent 4 }}
   {{- end }}
-  {{- with .Values.livenessProbe }}
+  {{- if .Values.pdb.enabled }}
   pdb:
     enabled: {{ .Values.pdb.enabled }}
     minAvailable: {{ .Values.pdb.minAvailable }}
     maxUnavailable: {{ .Values.pdb.maxUnavailable }}
   {{- end }}
-  livenessProbe:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- with .Values.readinessProbe }}
-  readinessProbe:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  
