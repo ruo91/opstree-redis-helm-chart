@@ -8,6 +8,10 @@ metadata:
     {{ if .Values.redisStandalone.recreateStatefulSetOnUpdateInvalid }}
     redis.opstreelabs.in/recreate-statefulset: "true"
     {{ end }}
+    {{- if and .Values.redisStandalone.multus.enabled .Values.redisStandalone.multus.name }}
+    k8s.v1.cni.cncf.io/networks: >
+      [{"name": "{{ .Values.redisStandalone.multus.name }}"}]
+    {{- end }}
 spec:
   kubernetesConfig:
     image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"

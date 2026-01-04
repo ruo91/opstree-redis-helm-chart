@@ -25,6 +25,17 @@ redisCluster:
       memory: 32Gi
       #hugepages-2Mi: "32Gi"
       #hugepages-1Gi: "32Gi"
+
+  # Enable or disable Multus CNI attachment for Redis Pods.
+  # When set to true, an additional network interface (net1) will be attached to each Pod.
+  multus:
+    enabled: true
+
+    # Name of the Multus NetworkAttachmentDefinition (NAD) to use.
+    # This must match an existing NAD in the same namespace.
+    # Only applied when 'enabled' is set to true.
+    name: redis-cluster-ipvlan-l2
+
   minReadySeconds: 0
   # -- Some fields of statefulset are immutable, such as volumeClaimTemplates.
   #    When set to true, the operator will delete the statefulset and recreate it.
@@ -183,7 +194,7 @@ externalConfig:
     io-threads 4
 
 externalService:
-  enabled: true
+  enabled: false
   # annotations:
   #   foo: bar
   #serviceType: ClusterIP

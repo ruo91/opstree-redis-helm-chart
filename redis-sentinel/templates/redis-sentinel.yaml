@@ -8,6 +8,10 @@ metadata:
     {{ if .Values.redisSentinel.recreateStatefulSetOnUpdateInvalid }}
     redis.opstreelabs.in/recreate-statefulset: "true"
     {{ end }}
+    {{- if and .Values.redisSentinel.multus.enabled .Values.redisSentinel.multus.name }}
+    k8s.v1.cni.cncf.io/networks: >
+      [{"name": "{{ .Values.redisSentinel.multus.name }}"}]
+    {{- end }}
 spec:
   clusterSize: {{ .Values.redisSentinel.clusterSize }}
   # Sentinel Config

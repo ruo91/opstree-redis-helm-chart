@@ -31,6 +31,16 @@ redisStandalone:
   #    Default is 0 (disabled).
   maxMemoryPercentOfLimit: 0
 
+  # Enable or disable Multus CNI attachment for Redis Pods.
+  # When set to true, an additional network interface (net1) will be attached to each Pod.
+  multus:
+    enabled: true
+
+    # Name of the Multus NetworkAttachmentDefinition (NAD) to use.
+    # This must match an existing NAD in the same namespace.
+    # Only applied when 'enabled' is set to true.
+    name: redis-ipvlan-l2
+
 labels: {}
 #   foo: bar
 #   test: echo

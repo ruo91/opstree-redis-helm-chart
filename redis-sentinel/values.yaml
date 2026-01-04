@@ -25,6 +25,16 @@ redisSentinel:
   # When set to true, the operator will delete the statefulset and recreate it. Default is false.
   recreateStatefulSetOnUpdateInvalid: false
 
+  # Enable or disable Multus CNI attachment for Redis Pods.
+  # When set to true, an additional network interface (net1) will be attached to each Pod.
+  multus:
+    enabled: true
+
+    # Name of the Multus NetworkAttachmentDefinition (NAD) to use.
+    # This must match an existing NAD in the same namespace.
+    # Only applied when 'enabled' is set to true.
+    name: redis-sentinel-ipvlan-l2
+
 # Overwite name for resources
 # name: ""
 

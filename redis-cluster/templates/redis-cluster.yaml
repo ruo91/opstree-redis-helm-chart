@@ -11,6 +11,10 @@ metadata:
     {{- if .Values.redisCluster.enableMasterSlaveAntiAffinity }}
     redisclusters.redis.redis.opstreelabs.in/role-anti-affinity: "true"
     {{- end }}
+    {{- if and .Values.redisCluster.multus.enabled .Values.redisCluster.multus.name }}
+    k8s.v1.cni.cncf.io/networks: >
+      [{"name": "{{ .Values.redisCluster.multus.name }}"}]
+    {{- end }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}

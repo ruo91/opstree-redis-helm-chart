@@ -8,6 +8,10 @@ metadata:
     {{ if .Values.redisReplication.recreateStatefulSetOnUpdateInvalid }}
     redis.opstreelabs.in/recreate-statefulset: "true"
     {{ end }}
+    {{- if and .Values.redisReplication.multus.enabled .Values.redisReplication.multus.name }}
+    k8s.v1.cni.cncf.io/networks: >
+      [{"name": "{{ .Values.redisReplication.multus.name }}"}]
+    {{- end }}
 spec:
   clusterSize: {{ .Values.redisReplication.clusterSize }}  
   kubernetesConfig:
