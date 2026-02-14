@@ -24,6 +24,9 @@ redisSentinel:
   # -- Some fields of statefulset are immutable, such as volumeClaimTemplates.
   # When set to true, the operator will delete the statefulset and recreate it. Default is false.
   recreateStatefulSetOnUpdateInvalid: false
+  persistentVolumeClaimRetentionPolicy: {}
+    # whenDeleted: Delete
+    # whenScaled: Retain
 
   # Enable or disable Multus CNI attachment for Redis Pods.
   # When set to true, an additional network interface (net1) will be attached to each Pod.
@@ -293,6 +296,15 @@ tolerations: []
 #    operator: "Exists"
 #    #value: "value"
 #    effect: "NoSchedule"
+
+topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: kubernetes.io/hostname
+  #   whenUnsatisfiable: DoNotSchedule
+  #   labelSelector:
+  #     matchLabels:
+  #       role: sentinel
+  #       app: redis-sentinel
 
 serviceAccountName: "default"
 

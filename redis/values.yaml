@@ -30,6 +30,9 @@ redisStandalone:
   # -- MaxMemoryPercentOfLimit is the percentage of redis container memory limit to be used as maxmemory. 
   #    Default is 0 (disabled).
   maxMemoryPercentOfLimit: 0
+  persistentVolumeClaimRetentionPolicy: {}
+    # whenDeleted: Delete
+    # whenScaled: Retain
 
   # Enable or disable Multus CNI attachment for Redis Pods.
   # When set to true, an additional network interface (net1) will be attached to each Pod.
@@ -211,6 +214,14 @@ tolerations: []
 #    operator: "Exists"
 #    #value: "value"
 #    effect: "NoSchedule"
+
+topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: kubernetes.io/hostname
+  #   whenUnsatisfiable: DoNotSchedule
+  #   labelSelector:
+  #     matchLabels:
+  #       app: redis
 
 serviceAccountName: "default"
 
