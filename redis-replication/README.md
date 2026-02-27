@@ -96,6 +96,12 @@ helm delete <my-release> --namespace <namespace>
 | redisReplication.serviceType | string | `"ClusterIP"` |  |
 | redisReplication.tag | string | `"v7.0.15"` |  |
 | securityContext | object | `{}` |  |
+| sentinel | object | `{"announceHostnames":"no","downAfterMilliseconds":"5000","enabled":false,"failoverTimeout":"10000","ignoreAnnotations":[],"image":"quay.io/opstree/redis-sentinel","imagePullPolicy":"IfNotPresent","minReadySeconds":0,"parallelSyncs":"1","persistentVolumeClaimRetentionPolicy":{},"resolveHostnames":"no","resources":{},"size":3,"tag":"v7.0.15"}` | Sentinel configuration for automatic failover. When enabled, the operator creates a Sentinel StatefulSet alongside the replication pods. The operator queries Sentinel for the current master instead of forcing master-by-ordinal. |
+| sentinel.announceHostnames | string | `"no"` | Whether Sentinel announces hostnames instead of IPs to clients |
+| sentinel.downAfterMilliseconds | string | `"5000"` | Time in milliseconds before master is considered down |
+| sentinel.failoverTimeout | string | `"10000"` | Failover timeout in milliseconds |
+| sentinel.parallelSyncs | string | `"1"` | Number of replicas to reconfigure in parallel during failover |
+| sentinel.resolveHostnames | string | `"no"` | Use hostnames instead of IPs for Sentinel monitoring. WARNING: the operator does not pass RESOLVE_HOSTNAMES env var to sentinel pods, so setting this to "yes" will cause SENTINEL MONITOR to fail. Keep as "no". |
 | serviceAccountName | string | `""` |  |
 | serviceMonitor.enabled | bool | `false` |  |
 | serviceMonitor.extraLabels | object | `{}` | extraLabels are added to the servicemonitor when enabled set to true |
@@ -103,14 +109,6 @@ helm delete <my-release> --namespace <namespace>
 | serviceMonitor.namespace | string | `""` | Namespace where servicemonitor resource will be created, if empty it will be created in the same namespace as the redis-replication |
 | serviceMonitor.scrapeTimeout | string | `"10s"` |  |
 | sidecars | list | `[]` |  |
-| sidecars.env | list | `[]` |  |
-| sidecars.image | string | `""` |  |
-| sidecars.imagePullPolicy | string | `"IfNotPresent"` |  |
-| sidecars.name | string | `""` |  |
-| sidecars.resources.limits.cpu | string | `"100m"` |  |
-| sidecars.resources.limits.memory | string | `"128Mi"` |  |
-| sidecars.resources.requests.cpu | string | `"50m"` |  |
-| sidecars.resources.requests.memory | string | `"64Mi"` |  |
 | storageSpec.volumeClaimTemplate.spec.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | storageSpec.volumeClaimTemplate.spec.resources.requests.storage | string | `"1Gi"` |  |
 | tolerations | list | `[]` |  |
