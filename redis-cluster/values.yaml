@@ -312,7 +312,7 @@ podSecurityContext:
   fsGroup: 1000
 
 TLS:
-  ca: ca.key
+  ca: ca.crt
   cert: tls.crt
   key: tls.key
   secret:
