@@ -333,3 +333,5 @@ env: []
   #   value: "value1"
 
 serviceAccountName: "default"
+
+podManagementPolicy: OrderedReady
