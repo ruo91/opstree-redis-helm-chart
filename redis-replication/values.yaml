@@ -7,7 +7,11 @@ redisReplication:
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
     # - name:  Secret with Registry credentials
+  # -- Secret holding the password Sentinel uses to authenticate to Redis.
+  # Leave empty to fall back to redisReplication.redisSecret.
   redisSecret:
+    #secretName: ""
+    #secretKey: ""
     secretName: "redis-secret"
     secretKey: "password"
   serviceType: ClusterIP
@@ -284,6 +288,9 @@ sidecars: []
 
 priorityClassName: ""
 
+  # -- Termination grace period (in seconds) for Sentinel pods.
+  terminationGracePeriodSeconds:
+
 nodeSelector:
   node-role.kubernetes.io/worker: ""
 
@@ -429,6 +436,43 @@ sentinel:
   resolveHostnames: "no"
   # -- Whether Sentinel announces hostnames instead of IPs to clients
   announceHostnames: "no"
-  # -- Additional raw sentinel.conf lines
+  # Additional raw sentinel.conf lines
   # additionalSentinelConfig: |
   #   sentinel auth-pass mymaster password123
+  affinity: {}
+    # podAntiAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #   - labelSelector:
+    #       matchExpressions:
+    #       - key: app
+    #         operator: In
+    #         values:
+    #         - redis-replication
+    #     topologyKey: kubernetes.io/hostname
+  # -- Tolerations for Sentinel pods.
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+  # -- Node selector for scheduling Sentinel pods.
+  nodeSelector: {}
+    # memory: medium
+  # -- Topology spread constraints for Sentinel pods.
+  topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: kubernetes.io/hostname
+    #   whenUnsatisfiable: DoNotSchedule
+    #   labelSelector:
+    #     matchLabels:
+    #       role: sentinel
+  # -- Pod-level security context for Sentinel pods.
+  podSecurityContext: {}
+  # -- Container-level security context for the Sentinel container.
+  securityContext: {}
+  # -- PriorityClass name for Sentinel pods.
+  priorityClassName: ""
+  # -- Termination grace period (in seconds) for Sentinel pods.
+  terminationGracePeriodSeconds:
+  # -- ServiceAccount name for Sentinel pods.
+  serviceAccountName: ""
