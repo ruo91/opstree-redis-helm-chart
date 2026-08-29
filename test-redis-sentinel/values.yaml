@@ -1,6 +1,6 @@
 ---
 redisSentinel:
-  name: "redis-sentinel"
+  name: "test-redis-sentinel"
   clusterSize: 3
   image: docker.io/ruo91/opstree-redis-sentinel-fedora
   tag: v8.10.1
@@ -38,7 +38,7 @@ redisSentinel:
     # Name of the Multus NetworkAttachmentDefinition (NAD) to use.
     # This must match an existing NAD in the same namespace.
     # Only applied when 'enabled' is set to true.
-    name: redis-sentinel-ipvlan-l2
+    name: test-redis-sentinel-ipvlan-l2
 
 # Overwite name for resources
 # name: ""
@@ -52,7 +52,7 @@ annotations: {}
 #   prometheus.io/scrape: "true"
 
 redisSentinelConfig:
-  redisReplicationName: "redis-replication"
+  redisReplicationName: "test-redis-replication"
   redisReplicationPassword:
     secretName: ""
     secretKey: ""
@@ -377,9 +377,9 @@ topologySpreadConstraints: []
   #   labelSelector:
   #     matchLabels:
   #       role: sentinel
-  #       app: redis-sentinel
+  #       app: test-redis-sentinel
 
-serviceAccountName: "default"
+serviceAccountName: "test-redis"
 
 TLS:
   ca: ca.crt

@@ -3,27 +3,27 @@ redisReplication:
   name: "redis"
   clusterSize: 3
   image: docker.io/ruo91/opstree-redis-fedora
-  tag: v8.0.2
+  tag: v8.10.1
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
     # - name:  Secret with Registry credentials
   # -- Secret holding the password Sentinel uses to authenticate to Redis.
   # Leave empty to fall back to redisReplication.redisSecret.
   redisSecret:
-    #secretName: ""
-    #secretKey: ""
-    secretName: "redis-secret"
-    secretKey: "password"
+    secretName: ""
+    secretKey: ""
+    #secretName: "redis-secret"
+    #secretKey: "password"
   serviceType: ClusterIP
   resources:
     requests:
-      #cpu: 8
-      memory: 32Gi
+      cpu: 4
+      memory: 16Gi
       #hugepages-2Mi: "32Gi"
       #hugepages-1Gi: "32Gi"
     limits:
-      #cpu: 8
-      memory: 32Gi
+      cpu: 4
+      memory: 16Gi
       #hugepages-2Mi: "32Gi"
       #hugepages-1Gi: "32Gi"
   ignoreAnnotations: []
@@ -52,7 +52,7 @@ redisReplication:
   # Enable or disable Multus CNI attachment for Redis Pods.
   # When set to true, an additional network interface (net1) will be attached to each Pod.
   multus:
-    enabled: true
+    enabled: false
 
     # Name of the Multus NetworkAttachmentDefinition (NAD) to use.
     # This must match an existing NAD in the same namespace.
@@ -99,13 +99,24 @@ externalConfig:
     maxclients 50000
     
     # Listen backlog for pending TCP connection (subject to /proc/sys/net/core/somaxconn).
-    tcp-backlog 65535
+    tcp-backlog 1048576
     
     # Client idle timeout in seconds; 0 = never idsconnect idle clients.
     timeout 0
     
     # TCP keepalive interval in seconds. Helps detect dead peers/NAT drops.
     tcp-keepalive 300
+
+    #### General Logging ####
+    # Specify the server verbosity level.
+    # 'notice' is moderately verbose and is the recommended level for production environments[cite: 1].
+    loglevel notice
+
+    # Specify the log file name. 
+    # If you prefer to save logs directly to a mounted Persistent Volume (PVC), provide the absolute path.
+    # WARNING: Direct file logging may introduce minor disk I/O latency. Ensure the target path 
+    # is backed by high-performance storage (e.g., NVMe).
+    logfile "/data/redis.log"
     
     #### Announce IP/Port (for replicas behind NAT) ####
     # use these when the master must connect back to a  replica that is not directly reachable.
@@ -114,13 +125,13 @@ externalConfig:
     
     #### Memory Usage & Eviction ####
     # Hard cap for Redis memory. Includes data + overhead + client buffers.
-    maxmemory 32gb
+    maxmemory 12gb
     
     # Evict any key (volatile or not) using LRU when memory is full.
     maxmemory-policy allkeys-lru
     
     # Number of samples checked by LRU/LFU/TTL algorithms (higher = better accuracy, more CPU).
-    maxmemory-samples 10
+    maxmemory-samples 5
     
     #### Performance / Timing ####
     # Server cron frequency (1..500). Higher reduces latency of periodic tasks but increases CPU.
@@ -196,14 +207,13 @@ externalConfig:
     # When diskless, wait N seconds to gather more replicas before starting bulk transfer.
     repl-diskless-sync-delay 5
     
-    #### Memory optimization for small Hashes ####
-    # NOTE (Redis >= 7): "hash-max-ziplist-*" are legacy aliases for listpack thresholds.
-    # Prefer "hash-max-listpack-*" in new configs; these aliases still work in Redis 8.
-    # Use compact encoding for hashes with <= 1024 fields...
-    hash-max-ziplist-entries 1024
+    #### Memory Optimization for Data Structures (Redis 8 Standard) ####
+    # Use highly memory-efficient listpack encoding for Hashes containing up to 1024 fields.
+    hash-max-listpack-entries 1024
     
-    # and when each field+value is <= 256 bytes. Larger hashes are promoted to hashtable.
-    hash-max-ziplist-value 256
+    # The maximum size (in bytes) of a single field/value to remain in listpack encoding.
+    # Exceeding this threshold will convert the Hash to a standard hashtable.
+    hash-max-listpack-value 256
     
     #### Asynchronous freeing & defragmentation ####
     # Evict keys lazily in background threads (reduces main-thread pauses during eviction).
@@ -218,15 +228,33 @@ externalConfig:
     # Actively defragment memory to combat long-running fragmentation and stabilize RSS.
     activedefrag yes
     
-    #### I/O Multi-Threading ####
-    # Offload read handling to I/O threads (writes remain serialized on the main thread).
+    #### I/O Multi-Threading & CPU Affinity (Ultra-Low Latency Core) ####
+    # Number of dedicated I/O threads. 
+    # In a 4-core setup, we allocate 2 threads for I/O, leaving 1 for Main and 1 for BIO.
+    io-threads 2
     io-threads-do-reads yes
-    
-    # Number of I/O threads. Use a value close to available CPU cores; too high can hurt performance.
-    io-threads 64
+
+    # CPU Pinning: Lock the main event-loop thread exclusively to Core 0.
+    # This guarantees 100% L1/L2 cache locality and eliminates context-switching jitter.
+    server-cpulist 0
+
+    # CPU Pinning: Assign the 2 network I/O threads to Cores 1 and 2.
+    # This offloads socket reads and protocol parsing without stealing CPU cycles from the main thread.
+    io-threads-cpulist 1-2
+
+    # CPU Pinning: Isolate frequent background I/O tasks (fsync, lazy free) to Core 3.
+    bio-cpulist 3
+
+    # CPU Pinning: Isolate heavy AOF rewrite child processes to Core 3.
+    aof-rewrite-cpulist 3
+
+    # CPU Pinning: Isolate heavy RDB snapshot (COW) child processes to Core 3.
+    # Since BGSAVE and AOF rewrites do not run simultaneously, they can safely share Core 3 
+    # along with the BIO threads, completely isolating the main thread (Core 0) from any disk I/O.
+    bgsave-cpulist 3
 
 externalService:
-  enabled: true
+  enabled: false
   # annotations:
   #   foo: bar
   serviceType: NodePort
@@ -234,7 +262,7 @@ externalService:
   nodePort: 30011
 
 serviceMonitor:
-  enabled: false
+  enabled: true
   interval: 30s
   scrapeTimeout: 10s
   # -- Namespace where servicemonitor resource will be created, if empty it will be created in the same namespace as the redis-replication
@@ -247,7 +275,7 @@ serviceMonitor:
 redisExporter:
   enabled: true
   image: docker.io/ruo91/opstree-redis-exporter-fedora
-  tag: "v1.74.0"
+  tag: "v1.89.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
@@ -278,7 +306,7 @@ initContainer:
 
 sidecars: []
   # - name: "redis-tools"
-  #   image: "docker.io/ruo91/opstree-redis-tools-fedora:v8.0.2"
+  #   image: "docker.io/ruo91/opstree-redis-tools-fedora:v8.10.1"
   #   imagePullPolicy: "IfNotPresent"
   #   resources:
   #     limits:
@@ -324,7 +352,7 @@ podSecurityContext:
   - name: net.core.somaxconn
     value: "1048576"
   - name: net.ipv4.tcp_max_syn_backlog
-    value: "65536"
+    value: "1048576"
   - name: net.ipv4.ip_nonlocal_bind
     value: "1"
   - name: net.ipv4.tcp_tw_reuse
@@ -412,7 +440,7 @@ pdb:
   minAvailable: 1
   maxUnavailable: null
 
-podManagementPolicy: OrderedReady
+#podManagementPolicy: OrderedReady
 
 # -- Sentinel configuration for automatic failover.
 # When enabled, the operator creates a Sentinel StatefulSet alongside the replication pods.
@@ -420,7 +448,7 @@ podManagementPolicy: OrderedReady
 sentinel:
   enabled: false
   image: docker.io/ruo91/opstree-redis-sentinel-fedora
-  tag: v8.0.2
+  tag: v8.10.1
   imagePullPolicy: IfNotPresent
   size: 3
   resources: {}

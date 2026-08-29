@@ -1,9 +1,9 @@
 ---
 redisOperator:
   name: redis-operator
-  imageName: quay.io/opstree/redis-operator
+  imageName: docker.io/ruo91/opstree-redis-operator
   # Overrides the image tag whose default is the chart appVersion.
-  imageTag: ""
+  imageTag: "v0.26.0"
   # -- initContainerImageTag is the init-config init container image tag.
   # If not specified, defaults to imageTag, then falls back to chart appVersion.
   # Typically only needs to be set when using a different version for the init container.
@@ -111,8 +111,23 @@ certmanager:
 priorityClassName: ""
 nodeSelector: {}
 tolerateAllTaints: false
-tolerations: []
-affinity: {}
+#affinity: {}
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          #values:
+          #- ssd
+
+#tolerations: []
+tolerations:
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    #value: "value"
+    effect: "NoSchedule"
 
 podSecurityContext: {}
 #  fsGroup: 2000
