@@ -256,7 +256,7 @@ serviceMonitor:
 redisExporter:
   enabled: true
   image: docker.io/ruo91/opstree-redis-exporter-fedora
-  tag: "v1.89.0"
+  tag: "v1.90.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
