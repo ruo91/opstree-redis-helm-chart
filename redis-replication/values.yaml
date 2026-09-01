@@ -325,8 +325,8 @@ sidecars: []
 
 priorityClassName: ""
 
-  # -- Termination grace period (in seconds) for Sentinel pods.
-  terminationGracePeriodSeconds:
+# -- Termination grace period (in seconds) for Sentinel pods.
+terminationGracePeriodSeconds:
 
 nodeSelector:
   node-role.kubernetes.io/worker: ""
