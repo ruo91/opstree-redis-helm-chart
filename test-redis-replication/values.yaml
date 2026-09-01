@@ -1,6 +1,6 @@
 ---
 redisReplication:
-  name: "test-redis"
+  name: "test-redis-replication"
   clusterSize: 3
   image: docker.io/ruo91/opstree-redis-fedora
   tag: v8.10.1
