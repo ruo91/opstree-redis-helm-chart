@@ -210,10 +210,6 @@ externalConfig:
     # This guarantees 100% L1/L2 cache locality and eliminates context-switching jitter.
     server-cpulist 0
 
-    # CPU Pinning: Assign the 2 network I/O threads to Cores 1 and 2.
-    # This offloads socket reads and protocol parsing without stealing CPU cycles from the main thread.
-    io-threads-cpulist 1-2
-
     # CPU Pinning: Isolate frequent background I/O tasks (fsync, lazy free) to Core 3.
     bio-cpulist 3
 
